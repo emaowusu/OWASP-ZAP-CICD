@@ -15,7 +15,7 @@ jobs:
 
     services:
       web:
-        image: owasp-app
+        image: emacodes/owasp-app:latest
         ports:
           - 3000:3000
         options: >-
