@@ -4,7 +4,6 @@ on:
   push:
     branches: 
       - main
-
   pull_request:
     branches: 
       - main
@@ -13,27 +12,24 @@ jobs:
   zap_scan:
     runs-on: ubuntu-latest
 
-    services:
-      web:
-        image: emacodes/owasp-app:latest
-        ports:
-          - 3000:3000
-        options: >-
-          --health-cmd "curl -f http://localhost:3000 || exit 1"
-          --health-interval 5s
-          --health-timeout 2s
-          --health-retries 5
-
     steps:
+    # Step 1: Checkout the code
     - name: Checkout code
       uses: actions/checkout@v5
 
+    # Step 2: Build Docker image for your web app
     - name: Build Docker image
       run: docker build -t owasp-app .
 
-    - name: Start Web App
+    # Step 3: Start web app container in background
+    - name: Start web app
       run: docker run -d -p 3000:3000 owasp-app
 
+    # Step 4: Wait for the app to be ready (simple sleep)
+    - name: Wait for web app to start
+      run: sleep 10   # Increase if your app takes longer
+
+    # Step 5: Run OWASP ZAP Baseline Scan
     - name: Run OWASP ZAP Baseline Scan
       uses: zaproxy/action-baseline@v0.15.0
       with:
@@ -41,9 +37,21 @@ jobs:
         report_format: html
         cmd_options: "-a"
 
+    # Step 6: Upload ZAP HTML report
     - name: Upload ZAP HTML Report
       uses: actions/upload-artifact@v4
       with:
         name: zap-report
-        path: report_html.html
+        path: report.html
+
+    # Step 7: Stop web app container
+    - name: Stop web app
+      run: |
+        CONTAINER_ID=$(docker ps -q --filter ancestor=owasp-app)
+        docker stop $CONTAINER_ID
+
+    # Step 8: Notify if ZAP Scan Fails
+    - name: Notify if ZAP Scan Fails
+      if: failure()
+      run: echo "🚨 OWASP ZAP Scan failed! Please check the ZAP report."
 
