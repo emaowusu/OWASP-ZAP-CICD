@@ -15,7 +15,7 @@ jobs:
 
     services:
       web:
-        image: owasp/zap2docker-stable
+        image: owasp/dependency-check:latest
         ports:
           - 3000:3000
         options: >-
