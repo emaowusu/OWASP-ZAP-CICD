@@ -43,11 +43,11 @@ jobs:
         cmd_options: "-a"
 
     # Step 6: Upload ZAP HTML report
-    - name: Upload ZAP HTML Report
-      uses: actions/upload-artifact@v4
-      with:
-        name: zap-report
-        path: report.html
+    # - name: Upload ZAP HTML Report
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: zap-report
+    #     path: report.html
 
     # Step 7: Stop web app container
     - name: Stop web app
